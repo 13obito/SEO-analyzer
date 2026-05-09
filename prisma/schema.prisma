@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  name           String?
+  hashedPassword String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  projects       Project[]
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  url       String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  analyses  Analysis[]
+
+  @@index([userId])
+}
+
+model Analysis {
+  id              String   @id @default(uuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url             String
+  crawlDepth      Int      @default(1)
+  status          String   @default("pending") // pending | crawling | analyzing | completed | failed
+  overallScore    Float?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  pages           PageResult[]
+  seoIssues       SeoIssue[]
+  keywords        KeywordResult[]
+
+  @@index([projectId])
+}
+
+model PageResult {
+  id               String   @id @default(uuid())
+  analysisId       String
+  analysis         Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  url              String
+  statusCode       Int?
+  title            String?
+  metaDescription  String?
+  h1Count          Int      @default(0)
+  h2Count          Int      @default(0)
+  h3Count          Int      @default(0)
+  h4Count          Int      @default(0)
+  h5Count          Int      @default(0)
+  h6Count          Int      @default(0)
+  headingStructure String?  // JSON: detailed heading hierarchy
+  imgTotal         Int      @default(0)
+  imgWithoutAlt    Int      @default(0)
+  internalLinks    Int      @default(0)
+  externalLinks    Int      @default(0)
+  brokenLinks      Int      @default(0)
+  linkDetails      String?  // JSON: array of link objects
+  loadTimeMs       Int?
+  pageSize         Int?     // bytes
+  wordCount        Int      @default(0)
+  isMobileFriendly Boolean  @default(false)
+  mobileFriendlyDetails String? // JSON: optional Lighthouse lab summary { lighthouse, performanceScore, metrics }
+  performanceScore Float?
+  pageScore        Float?
+  crawledAt        DateTime @default(now())
+
+  @@index([analysisId])
+}
+
+model SeoIssue {
+  id          String   @id @default(uuid())
+  analysisId  String
+  analysis    Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  pageUrl     String?
+  severity    String   // critical | warning | info
+  category    String   // title | meta | heading | image | link | performance | mobile | keyword
+  message     String
+  suggestion  String?
+  createdAt   DateTime @default(now())
+
+  @@index([analysisId])
+}
+
+model KeywordResult {
+  id          String   @id @default(uuid())
+  analysisId  String
+  analysis    Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  keyword     String
+  count       Int
+  density     Float    // percentage
+  isStuffing  Boolean  @default(false)
+  locations   String?  // JSON: where the keyword appears (title, h1, body, etc.)
+  createdAt   DateTime @default(now())
+
+  @@index([analysisId])
+}

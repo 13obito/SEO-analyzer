@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    "lighthouse",
+    "chrome-launcher",
+    "better-sqlite3",
+    "@prisma/adapter-better-sqlite3",
+    "@react-pdf/renderer",
+  ],
 };
 
 export default nextConfig;
