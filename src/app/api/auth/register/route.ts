@@ -41,8 +41,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(user, { status: 201 });
   } catch (err) {
     console.error("[auth/register]", err);
+    const devDetail =
+      process.env.NODE_ENV === "development" && err instanceof Error
+        ? err.message
+        : undefined;
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        ...(devDetail ? { devDetail } : {}),
+      },
       { status: 500 }
     );
   }

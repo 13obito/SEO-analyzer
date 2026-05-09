@@ -22,6 +22,9 @@ import {
 } from "@/lib/analysis-queue";
 import { runAnalysis } from "@/services/analyzer";
 
+/** Vercel Hobby: keep as high as your plan allows; deep crawls + Lighthouse may still exceed limits. */
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
   if (!userId) return unauthorizedResponse();
@@ -58,9 +61,15 @@ export async function POST(request: NextRequest) {
       return tooManyConcurrentAnalysesResponse();
     }
 
+    const useQueue =
+      process.env.ANALYSIS_USE_QUEUE === "1" ||
+      process.env.ANALYSIS_USE_QUEUE === "true";
+
     const useInline =
-      process.env.ANALYSIS_USE_INLINE === "1" ||
-      process.env.ANALYSIS_USE_INLINE === "true";
+      !useQueue &&
+      (process.env.VERCEL === "1" ||
+        process.env.ANALYSIS_USE_INLINE === "1" ||
+        process.env.ANALYSIS_USE_INLINE === "true");
 
     if (!useInline) {
       try {
@@ -84,7 +93,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (useInline) {
-      runAnalysis(analysis.id).catch(console.error);
+      const task = runAnalysis(analysis.id).catch(console.error);
+      if (process.env.VERCEL === "1") {
+        try {
+          const { waitUntil } = await import("@vercel/functions");
+          waitUntil(task);
+        } catch {
+          void task;
+        }
+      }
     } else {
       try {
         await enqueueAnalysisJob({ analysisId: analysis.id, userId });

@@ -4,9 +4,9 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [
     "lighthouse",
     "chrome-launcher",
-    "better-sqlite3",
-    "@prisma/adapter-better-sqlite3",
     "@react-pdf/renderer",
+    "pg",
+    "@prisma/adapter-pg",
   ],
 };
 
