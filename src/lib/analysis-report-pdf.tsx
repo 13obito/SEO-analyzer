@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
-import { severityLabel } from "@/lib/zh-ui";
+import { severityLabel, issueCategoryForDisplay, issueMessageForDisplay, issueSuggestionForDisplay } from "@/lib/zh-ui";
 
 const notoSansRegular = path.join(
   process.cwd(),
@@ -170,7 +170,7 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
             {issueParts[0].map((i, idx) => (
               <View key={idx} style={styles.row} wrap>
                 <Text style={[styles.td, { flex: 0.9 }]}>{severityLabel(i.severity)}</Text>
-                <Text style={[styles.td, { flex: 0.9 }]}>{safe(i.category, 80)}</Text>
+                <Text style={[styles.td, { flex: 0.9 }]}>{safe(issueCategoryForDisplay(i.category), 80)}</Text>
                 <Text
                   style={[
                     styles.td,
@@ -178,9 +178,9 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
                     i.severity === "critical" ? styles.critical : styles.warning,
                   ]}
                 >
-                  {safe(i.message, 500)}
+                  {safe(issueMessageForDisplay(i.message), 500)}
                 </Text>
-                <Text style={[styles.td, { flex: 1.8 }]}>{safe(i.suggestion, 400)}</Text>
+                <Text style={[styles.td, { flex: 1.8 }]}>{safe(issueSuggestionForDisplay(i.suggestion ?? ""), 400)}</Text>
               </View>
             ))}
           </View>
@@ -205,7 +205,7 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
             {rows.map((i, idx) => (
               <View key={idx} style={styles.row} wrap>
                 <Text style={[styles.td, { flex: 0.9 }]}>{severityLabel(i.severity)}</Text>
-                <Text style={[styles.td, { flex: 0.9 }]}>{safe(i.category, 80)}</Text>
+                <Text style={[styles.td, { flex: 0.9 }]}>{safe(issueCategoryForDisplay(i.category), 80)}</Text>
                 <Text
                   style={[
                     styles.td,
@@ -213,9 +213,9 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
                     i.severity === "critical" ? styles.critical : styles.warning,
                   ]}
                 >
-                  {safe(i.message, 500)}
+                  {safe(issueMessageForDisplay(i.message), 500)}
                 </Text>
-                <Text style={[styles.td, { flex: 1.8 }]}>{safe(i.suggestion, 400)}</Text>
+                <Text style={[styles.td, { flex: 1.8 }]}>{safe(issueSuggestionForDisplay(i.suggestion ?? ""), 400)}</Text>
               </View>
             ))}
           </View>

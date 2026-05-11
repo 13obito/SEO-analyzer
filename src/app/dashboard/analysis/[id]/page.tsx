@@ -17,6 +17,9 @@ import { sanitizeHtml } from "@/lib/security";
 import {
   severityLabel,
   formatKeywordLocations,
+  issueCategoryForDisplay,
+  issueMessageForDisplay,
+  issueSuggestionForDisplay,
 } from "@/lib/zh-ui";
 
 interface PageResultData {
@@ -261,8 +264,8 @@ export default function AnalysisPage() {
                   }`}
                 ></span>
                 <div>
-                  <p className="font-medium text-sm">{sanitizeHtml(issue.message)}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{sanitizeHtml(issue.suggestion)}</p>
+                  <p className="font-medium text-sm">{sanitizeHtml(issueMessageForDisplay(issue.message))}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{sanitizeHtml(issueSuggestionForDisplay(issue.suggestion))}</p>
                 </div>
               </div>
             ))
@@ -424,10 +427,10 @@ export default function AnalysisPage() {
                         {severityLabel(issue.severity)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{issue.category}</td>
-                    <td className="px-4 py-3">{sanitizeHtml(issue.message)}</td>
+                    <td className="px-4 py-3 text-slate-600">{issueCategoryForDisplay(issue.category)}</td>
+                    <td className="px-4 py-3">{sanitizeHtml(issueMessageForDisplay(issue.message))}</td>
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">
-                      {sanitizeHtml(issue.suggestion)}
+                      {sanitizeHtml(issueSuggestionForDisplay(issue.suggestion))}
                     </td>
                   </tr>
                 ))}
