@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
       if (!res.ok) {
         const parts = [data.error, data.devDetail].filter(Boolean);
-        setError(parts.join(" — ") || "Registration failed");
+        setError(parts.join(" — ") || "注册失败");
         return;
       }
 
@@ -46,7 +46,7 @@ export default function RegisterPage() {
         router.refresh();
       }
     } catch {
-      setError("Something went wrong");
+      setError("发生错误，请稍后重试");
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
           <h1 className="text-2xl font-bold text-center mb-6 text-slate-900">
-            Create Account
+            创建账号
           </h1>
 
           {error && (
@@ -69,19 +69,19 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Name
+                姓名（可选）
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
-                placeholder="Your name"
+                placeholder="您的称呼"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Email
+                邮箱
               </label>
               <input
                 type="email"
@@ -94,7 +94,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Password
+                密码
               </label>
               <input
                 type="password"
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
-                placeholder="At least 8 characters"
+                placeholder="至少 8 位字符"
               />
             </div>
             <button
@@ -111,17 +111,17 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white py-2 rounded-lg font-semibold transition-colors"
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? "正在创建…" : "创建账号"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
-            Already have an account?{" "}
+            已有账号？{" "}
             <Link
               href="/auth/login"
               className="text-emerald-600 hover:text-emerald-700 font-medium"
             >
-              Sign In
+              登录
             </Link>
           </p>
         </div>

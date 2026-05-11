@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { analysisStatusLabel } from "@/lib/zh-ui";
 
 interface AnalysisItem {
   id: string;
@@ -81,17 +82,17 @@ export default function ProjectPage() {
         fetchProject();
       } else {
         const data = await res.json();
-        setError(data.error || "Failed to start analysis");
+        setError(data.error || "无法启动分析");
       }
     } catch {
-      setError("Something went wrong");
+      setError("发生错误，请稍后重试");
     } finally {
       setAnalyzing(false);
     }
   }
 
   async function deleteProject() {
-    if (!confirm("Delete this project and all its analyses?")) return;
+    if (!confirm("确定删除该项目及其全部分析记录？")) return;
     await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
     router.push("/dashboard");
   }
@@ -110,7 +111,7 @@ export default function ProjectPage() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-2">
         <Link href="/dashboard" className="text-emerald-600 hover:text-emerald-700 text-sm">
-          &larr; Back to Dashboard
+          ← 返回控制台
         </Link>
       </div>
 
@@ -120,15 +121,16 @@ export default function ProjectPage() {
           <p className="text-slate-500 mt-1">{project.url}</p>
         </div>
         <button
+          type="button"
           onClick={deleteProject}
           className="text-red-500 hover:text-red-600 text-sm border border-red-200 hover:border-red-300 px-4 py-2 rounded-lg transition-colors"
         >
-          Delete Project
+          删除项目
         </button>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">New Analysis</h2>
+        <h2 className="text-lg font-semibold mb-4">新建分析</h2>
         {error && (
           <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
             {error}
@@ -137,31 +139,32 @@ export default function ProjectPage() {
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           <div className="flex-1">
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Crawl Depth (1-3)
+              抓取深度（1–3）
             </label>
             <select
               value={crawlDepth}
               onChange={(e) => setCrawlDepth(Number(e.target.value))}
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none"
             >
-              <option value={1}>1 - Single page</option>
-              <option value={2}>2 - Follow internal links (1 level)</option>
-              <option value={3}>3 - Deep crawl (2 levels)</option>
+              <option value={1}>1 — 仅首页</option>
+              <option value={2}>2 — 跟随内链（一层）</option>
+              <option value={3}>3 — 较深抓取（两层）</option>
             </select>
           </div>
           <button
+            type="button"
             onClick={startAnalysis}
             disabled={analyzing}
             className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white px-8 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap"
           >
-            {analyzing ? "Starting..." : "Run Analysis"}
+            {analyzing ? "启动中…" : "开始分析"}
           </button>
         </div>
       </div>
 
-      <h2 className="text-xl font-semibold mb-4">Analysis History</h2>
+      <h2 className="text-xl font-semibold mb-4">分析记录</h2>
       {project.analyses.length === 0 ? (
-        <p className="text-slate-500">No analyses yet. Run your first analysis above.</p>
+        <p className="text-slate-500">尚无分析。请在上方运行一次分析。</p>
       ) : (
         <div className="space-y-3">
           {project.analyses.map((analysis) => {
@@ -197,12 +200,12 @@ export default function ProjectPage() {
                       {isRunning && (
                         <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
                           <span className="animate-spin h-3 w-3 border-b-2 border-amber-500 rounded-full inline-block"></span>
-                          {analysis.status}
+                          {analysisStatusLabel(analysis.status)}
                         </span>
                       )}
                       {analysis.status === "failed" && (
                         <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full">
-                          Failed
+                          失败
                         </span>
                       )}
                     </div>
@@ -212,7 +215,7 @@ export default function ProjectPage() {
                       </p>
                     )}
                     <span className="text-xs text-slate-400">
-                      {new Date(analysis.createdAt).toLocaleString()}
+                      {new Date(analysis.createdAt).toLocaleString("zh-CN")}
                     </span>
                   </div>
                   <span className={`text-2xl font-bold ${scoreColor}`}>

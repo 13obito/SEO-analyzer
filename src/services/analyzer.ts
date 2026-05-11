@@ -11,10 +11,10 @@ import {
 const ERROR_UI_MAX = 800;
 
 function formatAnalysisError(err: unknown): string {
-  if (!(err instanceof Error)) return "Unknown error occurred";
+  if (!(err instanceof Error)) return "发生未知错误";
   const msg = err.message.trim();
   if (msg.length <= ERROR_UI_MAX) return msg;
-  return `${msg.slice(0, ERROR_UI_MAX)}… (see terminal for full log)`;
+  return `${msg.slice(0, ERROR_UI_MAX)}…（完整信息请查看服务器日志）`;
 }
 
 export async function runAnalysis(analysisId: string) {
@@ -28,7 +28,7 @@ export async function runAnalysis(analysisId: string) {
       where: { id: analysisId },
     });
 
-    if (!analysis) throw new Error("Analysis not found");
+    if (!analysis) throw new Error("未找到分析任务");
 
     const pages = await crawlSite(analysis.url, analysis.crawlDepth);
 
@@ -37,7 +37,7 @@ export async function runAnalysis(analysisId: string) {
         where: { id: analysisId },
         data: {
           status: "failed",
-          errorMessage: "Failed to crawl any pages from the provided URL",
+          errorMessage: "未能从该 URL 抓取到任何页面",
         },
       });
       return;

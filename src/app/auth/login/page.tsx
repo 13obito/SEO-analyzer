@@ -28,13 +28,13 @@ function LoginForm() {
       });
 
       if (res?.error) {
-        setError("Invalid email or password");
+        setError("邮箱或密码错误");
       } else {
         router.push(callbackUrl);
         router.refresh();
       }
     } catch {
-      setError("Something went wrong");
+      setError("发生错误，请稍后重试");
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
           <h1 className="text-2xl font-bold text-center mb-6 text-slate-900">
-            Sign In
+            登录
           </h1>
 
           {error && (
@@ -57,7 +57,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Email
+                邮箱
               </label>
               <input
                 type="email"
@@ -70,7 +70,7 @@ function LoginForm() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Password
+                密码
               </label>
               <input
                 type="password"
@@ -86,17 +86,17 @@ function LoginForm() {
               disabled={loading}
               className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white py-2 rounded-lg font-semibold transition-colors"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "登录中…" : "登录"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
-            Don&apos;t have an account?{" "}
+            还没有账号？{" "}
             <Link
               href="/auth/register"
               className="text-emerald-600 hover:text-emerald-700 font-medium"
             >
-              Register
+              去注册
             </Link>
           </p>
         </div>

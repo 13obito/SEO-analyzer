@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid input", details: z.prettifyError(parsed.error) },
+        { error: "输入无效", details: z.prettifyError(parsed.error) },
         { status: 400 }
       );
     }
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
-        { error: "Email already registered" },
+        { error: "该邮箱已被注册" },
         { status: 409 }
       );
     }
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         : undefined;
     return NextResponse.json(
       {
-        error: "Internal server error",
+        error: "服务器内部错误",
         ...(devDetail ? { devDetail } : {}),
       },
       { status: 500 }

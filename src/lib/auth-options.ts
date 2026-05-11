@@ -8,12 +8,12 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { label: "邮箱", type: "email" },
+        password: { label: "密码", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
+          throw new Error("请填写邮箱和密码");
         }
 
         const user = await prisma.user.findUnique({
@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          throw new Error("Invalid credentials");
+          throw new Error("账号或密码错误");
         }
 
         const isValid = await bcrypt.compare(
@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isValid) {
-          throw new Error("Invalid credentials");
+          throw new Error("账号或密码错误");
         }
 
         return {

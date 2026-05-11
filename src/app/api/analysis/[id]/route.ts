@@ -23,7 +23,7 @@ export async function GET(
   });
 
   if (!analysis) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "资源不存在" }, { status: 404 });
   }
 
   if (analysis.project.userId !== userId) {

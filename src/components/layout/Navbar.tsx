@@ -14,7 +14,7 @@ export function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
             <span className="text-emerald-400 text-2xl">&#9776;</span>
-            <span>SEO Analyzer</span>
+            <span>SEO 分析器</span>
           </Link>
 
           {session ? (
@@ -24,7 +24,7 @@ export function Navbar() {
                   href="/dashboard"
                   className="hover:text-emerald-400 transition-colors"
                 >
-                  Dashboard
+                  控制台
                 </Link>
                 <span className="text-slate-400 text-sm">
                   {session.user?.email}
@@ -33,11 +33,13 @@ export function Navbar() {
                   onClick={() => signOut({ callbackUrl: "/" })}
                   className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition-colors"
                 >
-                  Sign Out
+                  退出登录
                 </button>
               </div>
               <button
+                type="button"
                 className="md:hidden"
+                aria-label={menuOpen ? "关闭菜单" : "打开菜单"}
                 onClick={() => setMenuOpen(!menuOpen)}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,13 +53,13 @@ export function Navbar() {
                 href="/auth/login"
                 className="hover:text-emerald-400 transition-colors"
               >
-                Login
+                登录
               </Link>
               <Link
                 href="/auth/register"
                 className="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm transition-colors"
               >
-                Get Started
+                注册
               </Link>
             </div>
           )}
@@ -70,13 +72,14 @@ export function Navbar() {
               className="block hover:text-emerald-400 transition-colors py-1"
               onClick={() => setMenuOpen(false)}
             >
-              Dashboard
+              控制台
             </Link>
             <button
+              type="button"
               onClick={() => signOut({ callbackUrl: "/" })}
               className="block text-slate-400 hover:text-white transition-colors py-1"
             >
-              Sign Out
+              退出登录
             </button>
           </div>
         )}

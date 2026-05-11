@@ -37,18 +37,18 @@ export async function POST(request: NextRequest) {
     const parsed = analysisInputSchema.safeParse(body);
 
     if (!parsed.success) {
-      return badRequestResponse("Invalid input: check URL format and crawl depth (1-3)");
+      return badRequestResponse("输入无效：请检查 URL 与抓取深度（1–3）");
     }
 
     const { url, crawlDepth, projectId } = parsed.data;
 
     const project = await prisma.project.findUnique({ where: { id: projectId } });
-    if (!project) return badRequestResponse("Project not found");
+    if (!project) return badRequestResponse("项目不存在");
     if (project.userId !== userId) return forbiddenResponse();
 
     const urlCheck = isUrlSafe(url);
     if (!urlCheck.safe) {
-      return badRequestResponse(`Blocked URL: ${urlCheck.reason}`);
+      return badRequestResponse(`已拦截该 URL：${urlCheck.reason}`);
     }
 
     const activeForUser = await prisma.analysis.count({
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(analysis, { status: 201 });
   } catch {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "服务器内部错误" },
       { status: 500 }
     );
   }

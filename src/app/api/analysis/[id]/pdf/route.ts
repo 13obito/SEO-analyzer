@@ -29,7 +29,7 @@ export async function GET(
   });
 
   if (!analysis) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "资源不存在" }, { status: 404 });
   }
 
   if (analysis.project.userId !== userId) {
@@ -84,7 +84,7 @@ export async function GET(
   } catch (err) {
     console.error("[analysis/pdf]", err);
     return NextResponse.json(
-      { error: "Failed to generate PDF" },
+      { error: "PDF 生成失败" },
       { status: 500 }
     );
   }

@@ -7,8 +7,8 @@ const BLOCKED_IP_RANGES = [
   /^172\.(1[6-9]|2\d|3[01])\./,
   /^192\.168\./,
   /^0\./,
-  /^169\.254\./,         // link-local / AWS metadata
-  /^100\.(6[4-9]|[7-9]\d|1[0-2]\d)\./,  // carrier-grade NAT
+  /^169\.254\./, // link-local / AWS metadata
+  /^100\.(6[4-9]|[7-9]\d|1[0-2]\d)\./, // carrier-grade NAT
   /^::1$/,
   /^fc00:/i,
   /^fd00:/i,
@@ -30,29 +30,29 @@ export function isUrlSafe(urlString: string): { safe: boolean; reason?: string }
   try {
     parsed = new URL(urlString);
   } catch {
-    return { safe: false, reason: "Invalid URL format" };
+    return { safe: false, reason: "URL 格式无效" };
   }
 
   if (!["http:", "https:"].includes(parsed.protocol)) {
-    return { safe: false, reason: "Only HTTP and HTTPS protocols are allowed" };
+    return { safe: false, reason: "仅允许 http 或 https 协议" };
   }
 
   const hostname = parsed.hostname.toLowerCase();
 
   for (const blocked of BLOCKED_HOSTNAMES) {
     if (hostname === blocked || hostname.endsWith("." + blocked)) {
-      return { safe: false, reason: `Blocked hostname: ${hostname}` };
+      return { safe: false, reason: `禁止访问的主机名：${hostname}` };
     }
   }
 
   for (const pattern of BLOCKED_IP_RANGES) {
     if (pattern.test(hostname)) {
-      return { safe: false, reason: `Blocked IP range: ${hostname}` };
+      return { safe: false, reason: `禁止访问的 IP / 网段：${hostname}` };
     }
   }
 
   if (!parsed.hostname || parsed.hostname.trim() === "") {
-    return { safe: false, reason: "Empty hostname" };
+    return { safe: false, reason: "主机名为空" };
   }
 
   return { safe: true };
@@ -105,11 +105,11 @@ export function checkRateLimit(
   return { allowed: true, remaining: maxRequests - entry.count, resetAt: entry.resetAt };
 }
 
-export function unauthorizedResponse(message = "Unauthorized") {
+export function unauthorizedResponse(message = "未登录或登录已过期") {
   return NextResponse.json({ error: message }, { status: 401 });
 }
 
-export function forbiddenResponse(message = "Forbidden") {
+export function forbiddenResponse(message = "无权访问") {
   return NextResponse.json({ error: message }, { status: 403 });
 }
 
@@ -119,7 +119,7 @@ export function badRequestResponse(message: string) {
 
 export function rateLimitedResponse(resetAt: number) {
   return NextResponse.json(
-    { error: "Too many requests. Please try again later." },
+    { error: "请求过于频繁，请稍后再试。" },
     {
       status: 429,
       headers: {
@@ -133,7 +133,7 @@ export function tooManyConcurrentAnalysesResponse() {
   return NextResponse.json(
     {
       error:
-        "You have reached the maximum number of concurrent analyses. Wait for one to finish or increase ANALYSIS_MAX_PER_USER for self-hosted deployments.",
+        "当前进行中的分析已达上限。请等待任务结束；自建部署可调高 ANALYSIS_MAX_PER_USER。",
     },
     { status: 429 }
   );
@@ -143,7 +143,7 @@ export function analysisQueueBusyResponse() {
   return NextResponse.json(
     {
       error:
-        "The analysis queue is at capacity. Please try again shortly. (Redis worker fleet may need scaling up.)",
+        "分析队列已满，请稍后重试。（如需更多吞吐，请扩容 Redis Worker。）",
     },
     { status: 503 }
   );
@@ -153,7 +153,7 @@ export function analysisQueueUnavailableResponse() {
   return NextResponse.json(
     {
       error:
-        "Could not use the analysis queue. Ensure Redis is running (REDIS_URL), then start a worker with `npm run worker:analysis`. For local debugging only, set ANALYSIS_USE_INLINE=1.",
+        "无法使用分析队列。请确认 Redis 已运行（REDIS_URL）并执行 `npm run worker:analysis`。本地调试可设置 ANALYSIS_USE_INLINE=1。",
     },
     { status: 503 }
   );

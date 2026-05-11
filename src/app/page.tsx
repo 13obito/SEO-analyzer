@@ -6,25 +6,25 @@ export default function Home() {
       <section className="bg-slate-900 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Analyze &amp; Optimize Your
-            <span className="text-emerald-400"> SEO Performance</span>
+            分析并优化你的
+            <span className="text-emerald-400"> 网站 SEO</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-            Crawl your website, identify SEO issues, track keyword density,
-            monitor score trends, and get actionable recommendations — all in one platform.
+            自动抓取页面、发现 SEO 问题、统计关键词密度、查看得分趋势，并导出 PDF
+            报告——功能集中在一个控制台。
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/auth/register"
               className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl text-lg font-semibold transition-colors"
             >
-              Start Free Analysis
+              免费开始分析
             </Link>
             <Link
               href="/auth/login"
               className="border border-slate-500 hover:border-emerald-400 text-white px-8 py-3 rounded-xl text-lg font-semibold transition-colors"
             >
-              Sign In
+              登录
             </Link>
           </div>
         </div>
@@ -33,38 +33,38 @@ export default function Home() {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">
-            Comprehensive SEO Analysis
+            全面的 SEO 分析报告
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Site Crawling",
-                desc: "Automatically crawl pages with configurable depth. Extract titles, meta tags, headings, images, and links.",
+                title: "站点抓取",
+                desc: "可配置抓取深度，自动提取标题、meta、各级标题、图片与链接。",
                 icon: "🔍",
               },
               {
-                title: "SEO Scoring",
-                desc: "Get a 0-100 score with prioritized issues. Identify critical problems like missing titles, broken links, and slow pages.",
+                title: "SEO 打分",
+                desc: "0–100 分综合得分，并按优先级列出缺失标题、死链、加载过慢等问题。",
                 icon: "📊",
               },
               {
-                title: "Keyword Analysis",
-                desc: "Extract core keywords, calculate density, and detect keyword stuffing risks across your pages.",
+                title: "关键词分析",
+                desc: "提取核心词、计算词频密度，并提示疑似关键词堆砌风险。",
                 icon: "🔑",
               },
               {
-                title: "Link Checker",
-                desc: "Find broken links, analyze internal/external link distribution, and check response codes.",
+                title: "链接检测",
+                desc: "发现失效链接，统计内链/外链分布与响应状态码。",
                 icon: "🔗",
               },
               {
-                title: "Trend Monitoring",
-                desc: "Track your SEO score over time with visual charts. Compare multiple analyses side by side.",
+                title: "趋势监控",
+                desc: "用图表跟踪多次分析的得分变化，便于对比优化效果。",
                 icon: "📈",
               },
               {
-                title: "PDF Reports",
-                desc: "Export comprehensive analysis results as professional PDF reports for your team or clients.",
+                title: "PDF 报告",
+                desc: "一键导出专业版 PDF，方便团队协作或向客户交付。",
                 icon: "📄",
               },
             ].map((feature) => (
@@ -82,7 +82,7 @@ export default function Home() {
       </section>
 
       <footer className="bg-slate-900 text-slate-400 py-8 px-4 text-center text-sm">
-        <p>SEO Analyzer Platform &copy; {new Date().getFullYear()}</p>
+        <p>SEO 分析平台 &copy; {new Date().getFullYear()}</p>
       </footer>
     </div>
   );

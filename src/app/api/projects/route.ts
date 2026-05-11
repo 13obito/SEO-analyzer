@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const parsed = createProjectSchema.safeParse(body);
 
     if (!parsed.success) {
-      return badRequestResponse("Invalid input");
+      return badRequestResponse("输入无效");
     }
 
     const project = await prisma.project.create({
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(project, { status: 201 });
   } catch {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "服务器内部错误" },
       { status: 500 }
     );
   }

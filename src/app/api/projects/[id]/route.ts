@@ -31,7 +31,7 @@ export async function GET(
   });
 
   if (!project) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "资源不存在" }, { status: 404 });
   }
 
   if (project.userId !== userId) {
@@ -53,7 +53,7 @@ export async function DELETE(
   const project = await prisma.project.findUnique({ where: { id } });
 
   if (!project) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "资源不存在" }, { status: 404 });
   }
 
   if (project.userId !== userId) {

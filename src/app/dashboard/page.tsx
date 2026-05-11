@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { analysisStatusLabel } from "@/lib/zh-ui";
 
 interface ProjectData {
   id: string;
@@ -77,27 +78,28 @@ export default function DashboardPage() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">控制台</h1>
           <p className="text-slate-600 mt-1">
-            Welcome back, {session.user?.name || session.user?.email}
+            欢迎回来，{session.user?.name || session.user?.email}
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setShowNewProject(!showNewProject)}
           className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
         >
-          + New Project
+          + 新建项目
         </button>
       </div>
 
       {showNewProject && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4">Create New Project</h2>
+          <h2 className="text-lg font-semibold mb-4">新建项目</h2>
           <form onSubmit={createProject} className="flex flex-col sm:flex-row gap-4">
             <input
               type="text"
               required
-              placeholder="Project name"
+              placeholder="项目名称"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500 outline-none"
@@ -115,7 +117,7 @@ export default function DashboardPage() {
               disabled={creating}
               className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white px-6 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap"
             >
-              {creating ? "Creating..." : "Create"}
+              {creating ? "创建中…" : "创建"}
             </button>
           </form>
         </div>
@@ -124,15 +126,16 @@ export default function DashboardPage() {
       {projects.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-5xl mb-4">📋</div>
-          <h2 className="text-xl font-semibold mb-2">No projects yet</h2>
+          <h2 className="text-xl font-semibold mb-2">还没有项目</h2>
           <p className="text-slate-600 mb-6">
-            Create your first project to start analyzing SEO performance.
+            先创建一个项目，再开始 SEO 分析。
           </p>
           <button
+            type="button"
             onClick={() => setShowNewProject(true)}
             className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
           >
-            + Create Project
+            + 创建项目
           </button>
         </div>
       ) : (
@@ -167,13 +170,11 @@ export default function DashboardPage() {
                   {project.url}
                 </p>
                 <div className="flex justify-between items-center text-xs text-slate-400">
-                  <span>{project._count.analyses} analyses</span>
+                  <span>{project._count.analyses} 次分析</span>
                   <span>
                     {latestAnalysis
-                      ? latestAnalysis.status === "completed"
-                        ? "Completed"
-                        : latestAnalysis.status
-                      : "No analysis"}
+                      ? analysisStatusLabel(latestAnalysis.status)
+                      : "尚无分析"}
                   </span>
                 </div>
               </Link>
