@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
+import { aggregateSeoIssues } from "@/lib/aggregate-seo-issues";
 import { severityLabel, issueCategoryForDisplay, issueMessageForDisplay, issueSuggestionForDisplay } from "@/lib/zh-ui";
 
 /** WOFF2 在部分阅读器（如 Acrobat）中嵌入子集易报错；使用 WOFF + 仅用数字 fontWeight，避免合成为异常的 Thin-Bold。 */
@@ -103,6 +104,7 @@ export type AnalysisPdfInput = {
     performanceScore: number | null;
   }>;
   seoIssues: Array<{
+    pageUrl?: string | null;
     severity: string;
     category: string;
     message: string;
@@ -132,8 +134,8 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
   const score = data.overallScore ?? 0;
   const critical = data.seoIssues.filter((i) => i.severity === "critical");
   const warnings = data.seoIssues.filter((i) => i.severity === "warning");
-  const issueRows = [...critical, ...warnings];
-  const issueParts = chunk(issueRows, 22);
+  const issueRows = aggregateSeoIssues([...critical, ...warnings]);
+  const issueParts = chunk(issueRows, 18);
   const pageParts = chunk(data.pages, 14);
   const kwParts = chunk(data.keywords, 30);
 
@@ -157,31 +159,39 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
           <Text style={{ fontSize: 10, marginTop: 4 }}>综合 SEO 得分</Text>
         </View>
         <Text style={{ marginBottom: 8 }}>
-          已抓取页面：{data.pages.length} | 严重：{critical.length} | 警告：{warnings.length}
+          已抓取页面：{data.pages.length} | 问题条目：严重 {critical.length} · 警告 {warnings.length}{" "}
+          | 合并后条目：{issueRows.length}
         </Text>
         <Text style={styles.h2}>问题（首段）</Text>
         {issueParts[0]?.length ? (
           <View>
             <View style={[styles.row, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.th, { flex: 0.9 }]}>级别</Text>
-              <Text style={[styles.th, { flex: 0.9 }]}>类别</Text>
-              <Text style={[styles.th, { flex: 2 }]}>问题</Text>
-              <Text style={[styles.th, { flex: 1.8 }]}>建议</Text>
+              <Text style={[styles.th, { flex: 0.75 }]}>级别</Text>
+              <Text style={[styles.th, { flex: 0.65 }]}>页数</Text>
+              <Text style={[styles.th, { flex: 0.85 }]}>类别</Text>
+              <Text style={[styles.th, { flex: 1.85 }]}>问题</Text>
+              <Text style={[styles.th, { flex: 1.6 }]}>建议</Text>
             </View>
             {issueParts[0].map((i, idx) => (
               <View key={idx} style={styles.row} wrap>
-                <Text style={[styles.td, { flex: 0.9 }]}>{severityLabel(i.severity)}</Text>
-                <Text style={[styles.td, { flex: 0.9 }]}>{safe(issueCategoryForDisplay(i.category), 80)}</Text>
+                <Text style={[styles.td, { flex: 0.75 }]}>{severityLabel(i.severity)}</Text>
+                <Text style={[styles.td, { flex: 0.65 }]}>{i.affectedPages}</Text>
+                <Text style={[styles.td, { flex: 0.85 }]}>{safe(issueCategoryForDisplay(i.category), 60)}</Text>
                 <Text
                   style={[
                     styles.td,
-                    { flex: 2 },
+                    { flex: 1.85 },
                     i.severity === "critical" ? styles.critical : styles.warning,
                   ]}
                 >
-                  {safe(issueMessageForDisplay(i.message), 500)}
+                  {safe(issueMessageForDisplay(i.message), 320)}
                 </Text>
-                <Text style={[styles.td, { flex: 1.8 }]}>{safe(issueSuggestionForDisplay(i.suggestion ?? ""), 400)}</Text>
+                <Text style={[styles.td, { flex: 1.6 }]}>
+                  {safe(issueSuggestionForDisplay(i.suggestion ?? ""), 260)}
+                  {i.affectedPages > 1
+                    ? `\n示例：${i.samplePageUrls.map((u) => safe(u, 80)).join(" ")}`
+                    : ""}
+                </Text>
               </View>
             ))}
           </View>
@@ -198,25 +208,32 @@ export function AnalysisReportPdf({ data }: { data: AnalysisPdfInput }) {
           <Text style={styles.h2}>问题（续）</Text>
           <View>
             <View style={[styles.row, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.th, { flex: 0.9 }]}>级别</Text>
-              <Text style={[styles.th, { flex: 0.9 }]}>类别</Text>
-              <Text style={[styles.th, { flex: 2 }]}>问题</Text>
-              <Text style={[styles.th, { flex: 1.8 }]}>建议</Text>
+              <Text style={[styles.th, { flex: 0.75 }]}>级别</Text>
+              <Text style={[styles.th, { flex: 0.65 }]}>页数</Text>
+              <Text style={[styles.th, { flex: 0.85 }]}>类别</Text>
+              <Text style={[styles.th, { flex: 1.85 }]}>问题</Text>
+              <Text style={[styles.th, { flex: 1.6 }]}>建议</Text>
             </View>
             {rows.map((i, idx) => (
               <View key={idx} style={styles.row} wrap>
-                <Text style={[styles.td, { flex: 0.9 }]}>{severityLabel(i.severity)}</Text>
-                <Text style={[styles.td, { flex: 0.9 }]}>{safe(issueCategoryForDisplay(i.category), 80)}</Text>
+                <Text style={[styles.td, { flex: 0.75 }]}>{severityLabel(i.severity)}</Text>
+                <Text style={[styles.td, { flex: 0.65 }]}>{i.affectedPages}</Text>
+                <Text style={[styles.td, { flex: 0.85 }]}>{safe(issueCategoryForDisplay(i.category), 60)}</Text>
                 <Text
                   style={[
                     styles.td,
-                    { flex: 2 },
+                    { flex: 1.85 },
                     i.severity === "critical" ? styles.critical : styles.warning,
                   ]}
                 >
-                  {safe(issueMessageForDisplay(i.message), 500)}
+                  {safe(issueMessageForDisplay(i.message), 320)}
                 </Text>
-                <Text style={[styles.td, { flex: 1.8 }]}>{safe(issueSuggestionForDisplay(i.suggestion ?? ""), 400)}</Text>
+                <Text style={[styles.td, { flex: 1.6 }]}>
+                  {safe(issueSuggestionForDisplay(i.suggestion ?? ""), 260)}
+                  {i.affectedPages > 1
+                    ? `\n示例：${i.samplePageUrls.map((u) => safe(u, 80)).join(" ")}`
+                    : ""}
+                </Text>
               </View>
             ))}
           </View>

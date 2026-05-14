@@ -52,6 +52,17 @@ const MAX_CONCURRENT_REQUESTS = 5;
 const REQUEST_TIMEOUT_MS = 15_000;
 const MAX_PAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
+/** 同一文档的不同 hash 视为同一页，避免重复抓取与重复统计 */
+export function normalizeCrawlUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    u.hash = "";
+    return u.href;
+  } catch {
+    return url;
+  }
+}
+
 async function fetchPage(url: string): Promise<CrawlResult> {
   const safeCheck = isUrlSafe(url);
   if (!safeCheck.safe) {
@@ -184,7 +195,11 @@ export function parsePage(url: string, crawlResult: CrawlResult): PageSeoData {
   const internalLinks = linkDetails.filter((l) => !l.isExternal).length;
   const externalLinks = linkDetails.filter((l) => l.isExternal).length;
 
-  const bodyText = $("body").text().replace(/\s+/g, " ").trim();
+  const $body = $("body").clone();
+  $body
+    .find("script, style, noscript, pre, code, textarea, kbd, samp")
+    .remove();
+  const bodyText = $body.text().replace(/\s+/g, " ").trim();
   const wordCount = bodyText
     .split(/\s+/)
     .filter((w) => w.length > 0).length;
@@ -197,7 +212,7 @@ export function parsePage(url: string, crawlResult: CrawlResult): PageSeoData {
   });
 
   return {
-    url,
+    url: normalizeCrawlUrl(url),
     statusCode: crawlResult.statusCode,
     title: $("title").first().text().trim() || null,
     metaDescription:
@@ -284,7 +299,7 @@ export async function crawlSite(
   async function crawl(url: string, depth: number) {
     if (depth > maxDepth || visited.size >= maxPages) return;
 
-    const normalized = new URL(url).href;
+    const normalized = normalizeCrawlUrl(new URL(url).href);
     if (visited.has(normalized)) return;
     visited.add(normalized);
 
@@ -321,7 +336,7 @@ export async function crawlSite(
 
       for (const nextUrl of internalUrls.slice(0, 10)) {
         if (visited.size >= maxPages) break;
-        await crawl(nextUrl, depth + 1);
+        await crawl(normalizeCrawlUrl(nextUrl), depth + 1);
       }
     }
   }

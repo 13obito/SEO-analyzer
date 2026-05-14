@@ -53,6 +53,7 @@ export async function GET(
       performanceScore: p.performanceScore,
     })),
     seoIssues: analysis.seoIssues.map((i) => ({
+      pageUrl: i.pageUrl,
       severity: i.severity,
       category: i.category,
       message: i.message,

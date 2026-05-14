@@ -34,7 +34,12 @@ function tokenize(text: string): string[] {
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .split(/\s+/)
-    .filter((word) => word.length >= 2 && !STOP_WORDS.has(word));
+    .filter(
+      (word) =>
+        word.length >= 2 &&
+        !STOP_WORDS.has(word) &&
+        !/^[0-9a-f]{6,}$/i.test(word)
+    );
 }
 
 function findKeywordLocations(

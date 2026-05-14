@@ -14,6 +14,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { sanitizeHtml } from "@/lib/security";
+import { aggregateSeoIssues } from "@/lib/aggregate-seo-issues";
 import {
   severityLabel,
   formatKeywordLocations,
@@ -158,6 +159,8 @@ export default function AnalysisPage() {
 
   if (!session || !analysis) return null;
 
+  const aggregatedIssues = aggregateSeoIssues(analysis.seoIssues);
+
   const scoreColor =
     analysis.overallScore == null
       ? "text-slate-400"
@@ -174,7 +177,10 @@ export default function AnalysisPage() {
   const tabs = [
     { key: "overview" as const, label: "概览" },
     { key: "pages" as const, label: `页面 (${analysis.pages.length})` },
-    { key: "issues" as const, label: `问题 (${analysis.seoIssues.length})` },
+    {
+      key: "issues" as const,
+      label: `问题 (${aggregatedIssues.length} 类 / ${analysis.seoIssues.length} 条)`,
+    },
     { key: "keywords" as const, label: `关键词 (${analysis.keywords.length})` },
     { key: "trend" as const, label: "趋势" },
   ];
@@ -249,11 +255,14 @@ export default function AnalysisPage() {
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="font-semibold mb-4">主要问题</h3>
-            {analysis.seoIssues.length === 0 ? (
+            {aggregatedIssues.length === 0 ? (
               <p className="text-slate-500 text-sm">未发现问题。</p>
             ) : (
-            analysis.seoIssues.slice(0, 5).map((issue) => (
-              <div key={issue.id} className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+            aggregatedIssues.slice(0, 5).map((issue, idx) => (
+              <div
+                key={`${issue.severity}-${issue.category}-${issue.message}-${idx}`}
+                className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0"
+              >
                 <span
                   className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
                     issue.severity === "critical"
@@ -264,8 +273,16 @@ export default function AnalysisPage() {
                   }`}
                 ></span>
                 <div>
-                  <p className="font-medium text-sm">{sanitizeHtml(issueMessageForDisplay(issue.message))}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{sanitizeHtml(issueSuggestionForDisplay(issue.suggestion))}</p>
+                  <p className="font-medium text-sm">
+                    {sanitizeHtml(issueMessageForDisplay(issue.message))}
+                    {issue.affectedPages > 1 ? (
+                      <span className="text-slate-500 font-normal">
+                        {" "}
+                       （{issue.affectedPages} 页）
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">{sanitizeHtml(issueSuggestionForDisplay(issue.suggestion ?? ""))}</p>
                 </div>
               </div>
             ))
@@ -399,21 +416,25 @@ export default function AnalysisPage() {
 
       {activeTab === "issues" && (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          {analysis.seoIssues.length === 0 ? (
+          {aggregatedIssues.length === 0 ? (
             <div className="p-8 text-center text-slate-500">未发现问题，做得很棒。</div>
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">级别</th>
+                  <th className="text-left px-4 py-3 font-medium whitespace-nowrap">页数</th>
                   <th className="text-left px-4 py-3 font-medium">类别</th>
                   <th className="text-left px-4 py-3 font-medium">问题</th>
                   <th className="text-left px-4 py-3 font-medium hidden md:table-cell">建议</th>
                 </tr>
               </thead>
               <tbody>
-                {analysis.seoIssues.map((issue) => (
-                  <tr key={issue.id} className="border-b border-slate-100 last:border-0">
+                {aggregatedIssues.map((issue, idx) => (
+                  <tr
+                    key={`${issue.severity}-${issue.category}-${issue.message}-${idx}`}
+                    className="border-b border-slate-100 last:border-0"
+                  >
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
@@ -427,10 +448,17 @@ export default function AnalysisPage() {
                         {severityLabel(issue.severity)}
                       </span>
                     </td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{issue.affectedPages}</td>
                     <td className="px-4 py-3 text-slate-600">{issueCategoryForDisplay(issue.category)}</td>
                     <td className="px-4 py-3">{sanitizeHtml(issueMessageForDisplay(issue.message))}</td>
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">
-                      {sanitizeHtml(issueSuggestionForDisplay(issue.suggestion))}
+                      {sanitizeHtml(issueSuggestionForDisplay(issue.suggestion ?? ""))}
+                      {issue.affectedPages > 1 ? (
+                        <div className="mt-1 text-xs text-slate-400">
+                          示例：{issue.samplePageUrls.slice(0, 3).map((u) => sanitizeHtml(u)).join(" · ")}
+                          {issue.affectedPages > 3 ? " …" : ""}
+                        </div>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
