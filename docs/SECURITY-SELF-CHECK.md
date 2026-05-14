@@ -13,7 +13,7 @@
   - 仅 `http:` / `https:`
   - 拦截常见内网/metadata 主机名与 **字面量** 主机名为私网 IP 的情形（正则覆盖 127/10/172.16-31/192.168 等）
 - **爬虫 `fetchPage`（`src/services/crawler.ts`）** 在发起请求前再次 `isUrlSafe`，失败则不抓取。
-- **Lighthouse** 入口同样调用 `isUrlSafe`（`lighthouse-audit.ts`），不安全 URL 直接跳过 Lighthouse。
+- **Lighthouse / PageSpeed** 入口在 `runLighthouseSummary` / `runPageSpeedInsightsSummary`（`src/services/lighthouse-audit.ts`）均对 URL 使用 **`isUrlSafe`**；不安全或不合规 URL **不发起**本机 Lighthouse、也 **不调用** Google PageSpeed API。
 
 ### 1.2 未覆盖 / 诚实缺口（含重定向链）
 
@@ -22,6 +22,7 @@
 | **重定向后未复验** | `fetch` 使用 `redirect: "follow"`。若首跳 URL 对公网合法，**302/301 到内网或 metadata IP** 等场景，当前实现 **未在每一跳重新执行 `isUrlSafe`**，存在经典 **开放重定向 + SSRF** 组合的理论空间。 |
 | **DNS 重绑定** | 未做「解析后再校验目标 IP」或短缓存 TTL 下的二次校验；高级攻击面未建模。 |
 | **解析差异** | 依赖 `URL` 与 Node `fetch` 行为；国际化域名、非常规主机名字符等边界未单独审计。 |
+| **PageSpeed / 出站至 Google** | 在配置 `GOOGLE_PSI_API_KEY` 时，仅对 **通过 `isUrlSafe` 的入口 URL** 调用 PageSpeed API；仍引入 **对 Google 的 URL 披露** 与 **API 密钥管理** 责任（密钥须仅服务端、限制 API 范围、定期轮换）。 |
 
 **缓解建议（未实现）**：限制重定向次数；每次 Location 解析后 `isUrlSafe`；或对允许访问的 URL 使用固定解析与 IP 白名单策略。
 
@@ -92,8 +93,8 @@
 
 ### 6.1 要求
 
-- **`NEXTAUTH_SECRET`**、**`DATABASE_URL`**、**`REDIS_URL`** 仅通过环境注入，**.env 不入库**（`.gitignore`）。
-- 生产 **数据库**应强密码、TLS（`sslmode=require` 等）。
+- **`NEXTAUTH_SECRET`**、**`DATABASE_URL`**、**`REDIS_URL`**、**`GOOGLE_PSI_API_KEY`**（若启用 PageSpeed）仅通过环境注入，**.env 不入库**（`.gitignore`）。
+- 生产 **数据库**应强密码、TLS（`sslmode=require` 等）；应用启动时会对常见 `sslmode` 别名规范为 `verify-full`，以减少驱动弃用告警（见 `src/lib/prisma.ts`）。
 
 ### 6.2 缺口
 
@@ -111,6 +112,6 @@
 ## 8. 结论（自查）
 
 - **当前适合**：笔试演示与 PoC、内网或低暴露自有站自检、在明确告知限制下的公网试用。  
-- **生产级硬ening** 建议优先：**重定向后 URL 复验**、**Redis 限流**、**CSP**、按需关闭或隔离 Lighthouse。
+- **生产级硬ening** 建议优先：**重定向后 URL 复验**、**Redis 限流**、**CSP**、按需关闭或隔离本机 Lighthouse；使用 PageSpeed 时 **锁紧 GCP API Key** 与配额监控。
 
 ---
