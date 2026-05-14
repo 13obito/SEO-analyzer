@@ -24,6 +24,15 @@
 .DS_Store
 *.pem
 
+# Windows / stray shortcuts (e.g. copied .lnk into repo root)
+*.lnk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# JetBrains (if used alongside VS Code / Cursor)
+.idea/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

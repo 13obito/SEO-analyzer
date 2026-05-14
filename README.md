@@ -2,7 +2,7 @@
 
 面向中文用户的网站 SEO 自检平台：**项目 → 抓取与分析 → 评分 / 问题 / 关键词 / 趋势 / PDF 报告**。服务端抓取 HTML（Cheerio），可配置**爬取深度**；**实验室性能**优先使用本机 **Lighthouse**（需 Chrome），失败或无 Chrome 时可 fallback 到 **PageSpeed Insights API**（服务端环境变量密钥）；其余页面使用**基于首包耗时的启发式性能分**。分析任务支持 **Vercel 内联执行** 或 **Redis + BullMQ Worker**。
 
-**线上环境（Vercel）：** <https://seo-analyzer-asnz0rg7b-gz-s-projects.vercel.app/>
+**线上环境（Vercel）：** <https://seo-analyzer-gk8eg7rl9-gz-s-projects.vercel.app/>
 
 ---
 
@@ -177,7 +177,3 @@ npm run start
 - **安全自查**：[`docs/SECURITY-SELF-CHECK.md`](docs/SECURITY-SELF-CHECK.md)
 
 ---
-
-## 许可
-
-本仓库用于**实习/团队笔试提交**与作品集展示；版权归作者所有，未经允许请勿将源码用于商业再发布。
