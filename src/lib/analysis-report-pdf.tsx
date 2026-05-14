@@ -9,13 +9,14 @@ import {
 } from "@react-pdf/renderer";
 import { severityLabel, issueCategoryForDisplay, issueMessageForDisplay, issueSuggestionForDisplay } from "@/lib/zh-ui";
 
+/** WOFF2 在部分阅读器（如 Acrobat）中嵌入子集易报错；使用 WOFF + 仅用数字 fontWeight，避免合成为异常的 Thin-Bold。 */
 const notoSansRegular = path.join(
   process.cwd(),
-  "node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2"
+  "node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff"
 );
 const notoSansBold = path.join(
   process.cwd(),
-  "node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-700-normal.woff2"
+  "node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-700-normal.woff"
 );
 
 let cjkPdfFontRegistered = false;
@@ -25,8 +26,8 @@ function registerCjkPdfFont() {
     Font.register({
       family: "NotoSansSC",
       fonts: [
-        { src: notoSansRegular, fontWeight: 400 },
-        { src: notoSansBold, fontWeight: 700 },
+        { src: notoSansRegular, fontWeight: 400, fontStyle: "normal" },
+        { src: notoSansBold, fontWeight: 700, fontStyle: "normal" },
       ],
     });
   } catch {
@@ -73,15 +74,15 @@ const styles = StyleSheet.create({
   scoreGood: { backgroundColor: "#ecfdf5", color: "#059669" },
   scoreMedium: { backgroundColor: "#fffbeb", color: "#d97706" },
   scoreBad: { backgroundColor: "#fef2f2", color: "#dc2626" },
-  scoreNum: { fontSize: 32, fontWeight: "bold" },
+  scoreNum: { fontSize: 32, fontWeight: 700 },
   row: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#e8edf3", paddingVertical: 4 },
-  th: { fontWeight: "bold", fontSize: 8, color: "#334155", backgroundColor: "#f1f5f9", padding: 5 },
+  th: { fontWeight: 700, fontSize: 8, color: "#334155", backgroundColor: "#f1f5f9", padding: 5 },
   td: { fontSize: 8, padding: 4, flex: 1 },
   tdNarrow: { fontSize: 8, padding: 4, width: 44 },
   tdWide: { fontSize: 8, padding: 4, flex: 2 },
   critical: { color: "#dc2626" },
   warning: { color: "#d97706" },
-  stuffing: { color: "#dc2626", fontWeight: "bold" },
+  stuffing: { color: "#dc2626", fontWeight: 700 },
   footer: { marginTop: 20, fontSize: 8, color: "#94a3af", borderTopWidth: 1, borderTopColor: "#e2e8f0", paddingTop: 8 },
 });
 
