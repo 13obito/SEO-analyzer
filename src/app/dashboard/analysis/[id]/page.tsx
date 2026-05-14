@@ -56,19 +56,25 @@ type LighthouseMetrics = {
 function readLighthouseFromDetails(details: string | null): {
   fromLighthouse: boolean;
   metrics: LighthouseMetrics | null;
+  /** local Chrome vs Google PageSpeed Insights (both Lighthouse-powered) */
+  labSource: "local" | "pagespeed" | null;
 } {
-  if (!details) return { fromLighthouse: false, metrics: null };
+  if (!details) {
+    return { fromLighthouse: false, metrics: null, labSource: null };
+  }
   try {
     const o = JSON.parse(details) as {
       lighthouse?: boolean;
+      labSource?: "local" | "pagespeed";
       metrics?: LighthouseMetrics;
     };
     if (!o.lighthouse || !o.metrics) {
-      return { fromLighthouse: false, metrics: null };
+      return { fromLighthouse: false, metrics: null, labSource: null };
     }
-    return { fromLighthouse: true, metrics: o.metrics };
+    const labSource = o.labSource === "pagespeed" ? "pagespeed" : "local";
+    return { fromLighthouse: true, metrics: o.metrics, labSource };
   } catch {
-    return { fromLighthouse: false, metrics: null };
+    return { fromLighthouse: false, metrics: null, labSource: null };
   }
 }
 
@@ -318,7 +324,20 @@ export default function AnalysisPage() {
 
       {activeTab === "pages" && (
         <div className="space-y-4">
-          {analysis.pages.map((page) => (
+          {analysis.pages.map((page) => {
+            const labRow = readLighthouseFromDetails(page.mobileFriendlyDetails);
+            const labScoreLabel =
+              labRow.labSource === "pagespeed"
+                ? "（PageSpeed Insights）"
+                : labRow.fromLighthouse
+                  ? "（Lighthouse）"
+                  : "";
+            const labSectionTitle =
+              labRow.labSource === "pagespeed"
+                ? "PageSpeed Insights（移动 / Lighthouse）"
+                : "Lighthouse（移动 / 实验室）";
+
+            return (
             <div key={page.id} className="bg-white rounded-xl border border-slate-200 p-6">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-semibold text-sm truncate max-w-[70%]">
@@ -359,12 +378,10 @@ export default function AnalysisPage() {
                   <span className="text-slate-500">性能分：</span>{" "}
                   <span
                     className="font-medium"
-                    title="有 Lighthouse 时用实测；否则根据首包耗时估算"
+                    title="本地 Lighthouse、PageSpeed Insights（需配置密钥），否则按首包耗时估算"
                   >
                     {page.performanceScore != null ? page.performanceScore : "—"}
-                    {readLighthouseFromDetails(page.mobileFriendlyDetails).fromLighthouse
-                      ? "（Lighthouse）"
-                      : ""}
+                    {labScoreLabel}
                   </span>
                 </div>
                 <div>
@@ -385,32 +402,49 @@ export default function AnalysisPage() {
                   <span className={page.brokenLinks > 0 ? "text-red-600" : ""}>{page.brokenLinks}</span>
                 </div>
               </div>
-              {(() => {
-                const { metrics: m } = readLighthouseFromDetails(
-                  page.mobileFriendlyDetails
-                );
-                if (!m) return null;
-                const fmtMs = (n: number | null) =>
-                  n != null && Number.isFinite(n) ? `${Math.round(n)} ms` : "—";
-                const fmtCls = (n: number | null) =>
-                  n != null && Number.isFinite(n) ? n.toFixed(3) : "—";
-                return (
-                  <div className="mt-4 pt-4 border-t border-slate-100 text-sm">
-                    <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
-                      Lighthouse（移动 / 实验室）
-                    </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-slate-700">
-                      <div>首次内容绘制：{fmtMs(m.fcpMs)}</div>
-                      <div>最大内容绘制：{fmtMs(m.lcpMs)}</div>
-                      <div>总阻塞时间：{fmtMs(m.tbtMs)}</div>
-                      <div>累积布局偏移：{fmtCls(m.cls)}</div>
-                      <div>Speed Index：{fmtMs(m.speedIndexMs)}</div>
+              {labRow.metrics != null ? (
+                <div className="mt-4 pt-4 border-t border-slate-100 text-sm">
+                  <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                    {labSectionTitle}
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-slate-700">
+                    <div>
+                      首次内容绘制：
+                      {labRow.metrics.fcpMs != null && Number.isFinite(labRow.metrics.fcpMs)
+                        ? `${Math.round(labRow.metrics.fcpMs)} ms`
+                        : "—"}
+                    </div>
+                    <div>
+                      最大内容绘制：
+                      {labRow.metrics.lcpMs != null && Number.isFinite(labRow.metrics.lcpMs)
+                        ? `${Math.round(labRow.metrics.lcpMs)} ms`
+                        : "—"}
+                    </div>
+                    <div>
+                      总阻塞时间：
+                      {labRow.metrics.tbtMs != null && Number.isFinite(labRow.metrics.tbtMs)
+                        ? `${Math.round(labRow.metrics.tbtMs)} ms`
+                        : "—"}
+                    </div>
+                    <div>
+                      累积布局偏移：
+                      {labRow.metrics.cls != null && Number.isFinite(labRow.metrics.cls)
+                        ? labRow.metrics.cls.toFixed(3)
+                        : "—"}
+                    </div>
+                    <div>
+                      Speed Index：
+                      {labRow.metrics.speedIndexMs != null &&
+                      Number.isFinite(labRow.metrics.speedIndexMs)
+                        ? `${Math.round(labRow.metrics.speedIndexMs)} ms`
+                        : "—"}
                     </div>
                   </div>
-                );
-              })()}
+                </div>
+              ) : null}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

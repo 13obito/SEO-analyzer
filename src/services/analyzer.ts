@@ -4,8 +4,11 @@ import { scorePages } from "./seo-scorer";
 import { analyzeKeywords } from "./keyword-analyzer";
 import {
   runLighthouseSummary,
+  runPageSpeedInsightsSummary,
   urlsMatch,
   resolvePerformanceScore,
+  type LabPerformanceSource,
+  type LighthouseSummary,
 } from "./lighthouse-audit";
 
 const ERROR_UI_MAX = 800;
@@ -48,13 +51,21 @@ export async function runAnalysis(analysisId: string) {
       data: { status: "analyzing" },
     });
 
-    let lh: Awaited<ReturnType<typeof runLighthouseSummary>> = null;
+    let lab: {
+      summary: LighthouseSummary;
+      source: LabPerformanceSource;
+    } | null = null;
     if (process.env.LIGHTHOUSE_DISABLED !== "1") {
       try {
-        lh = await runLighthouseSummary(analysis.url);
+        const local = await runLighthouseSummary(analysis.url);
+        if (local) lab = { summary: local, source: "local" };
       } catch (lhErr) {
         console.error("[analyzer] Lighthouse failed (continuing without it):", lhErr);
       }
+    }
+    if (!lab) {
+      const psi = await runPageSpeedInsightsSummary(analysis.url);
+      if (psi) lab = { summary: psi, source: "pagespeed" };
     }
     const hasEntryMatch = pages.some((p) => urlsMatch(p.url, analysis.url));
 
@@ -63,10 +74,10 @@ export async function runAnalysis(analysisId: string) {
 
     for (const page of pages) {
       const lhForRow =
-        lh &&
+        lab &&
         (urlsMatch(page.url, analysis.url) ||
           (!hasEntryMatch && page.url === pages[0]?.url))
-          ? lh
+          ? lab
           : null;
 
       await prisma.pageResult.create({
@@ -96,19 +107,20 @@ export async function runAnalysis(analysisId: string) {
           mobileFriendlyDetails: lhForRow
             ? JSON.stringify({
                 lighthouse: true,
-                performanceScore: lhForRow.performanceScore,
+                labSource: lhForRow.source,
+                performanceScore: lhForRow.summary.performanceScore,
                 metrics: {
-                  fcpMs: lhForRow.fcpMs,
-                  lcpMs: lhForRow.lcpMs,
-                  tbtMs: lhForRow.tbtMs,
-                  cls: lhForRow.cls,
-                  speedIndexMs: lhForRow.speedIndexMs,
+                  fcpMs: lhForRow.summary.fcpMs,
+                  lcpMs: lhForRow.summary.lcpMs,
+                  tbtMs: lhForRow.summary.tbtMs,
+                  cls: lhForRow.summary.cls,
+                  speedIndexMs: lhForRow.summary.speedIndexMs,
                 },
               })
             : null,
           performanceScore: resolvePerformanceScore(
             page.loadTimeMs,
-            lhForRow
+            lhForRow?.summary ?? null
           ),
           pageScore: null,
         },
