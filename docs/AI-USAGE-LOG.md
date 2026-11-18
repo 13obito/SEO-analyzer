@@ -1,8 +1,5 @@
 # AI 使用日志
 
-> 目的：说明人机协作方式、主要工具、AI 参与较多的模块，以及人工决策与修改原因。  
-> 日期以仓库提交与对话为准；具体命令与时间线可按需补充。
-
 ---
 
 ## 1. 使用过的工具与协作方式
@@ -32,7 +29,7 @@
 - **国际化（中文界面）**：`src/app/**` 页面文案、`src/lib/zh-ui.ts`、SEO 规则中文 `src/services/seo-scorer.ts`、API 错误信息、`src/lib/analysis-report-pdf.tsx` 与中文字体注册。
 - **历史数据兼容**：英文 issue 库表字段的展示映射（`zh-ui.ts` 中 `LEGACY_*`），避免旧分析记录仍显示英文。
 - **安全相关工具函数**：`src/lib/security.ts`（URL 安全检查、内存限流响应体等），与调用方 API 路由对齐。
-- **项目文档**：本文件与 `README.md`、`SECURITY-SELF-CHECK.md` 的结构化撰写（基于当前代码事实核对）。
+- **项目文档**：本文件、`README.md`、`docs/PROJECT-CODEBASE-GUIDE.md`（代码库全貌索引）、`SECURITY-SELF-CHECK.md` 的结构化撰写（基于当前代码事实核对）。
 
 **以人工为主的部分**
 

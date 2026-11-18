@@ -20,7 +20,7 @@
 
 ---
 
-## 分析行为摘要（与笔试说明对齐）
+## 分析行为摘要
 
 | 能力 | 实现要点 |
 |------|-----------|
@@ -173,6 +173,7 @@ npm run start
 
 ## 仓库与文档
 
+- **代码库索引（AI / 答辩）**：[`docs/PROJECT-CODEBASE-GUIDE.md`](docs/PROJECT-CODEBASE-GUIDE.md)
 - **AI 协作说明**：[`docs/AI-USAGE-LOG.md`](docs/AI-USAGE-LOG.md)
 - **安全自查**：[`docs/SECURITY-SELF-CHECK.md`](docs/SECURITY-SELF-CHECK.md)
 
